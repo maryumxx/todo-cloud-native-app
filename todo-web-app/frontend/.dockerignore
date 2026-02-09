@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+*.md
+.env*
+Dockerfile*
+docker-compose*
+.nyc_output
+coverage
+.nyc_output
+dist
+build

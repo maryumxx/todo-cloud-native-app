@@ -1,0 +1,46 @@
+{{- if .Values.reminderService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "todo-app.fullname" . }}-reminder-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ include "todo-app.name" . }}-reminder-service
+    app.kubernetes.io/component: reminder-service
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+spec:
+  replicas: {{ .Values.reminderService.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "todo-app.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: {{ include "todo-app.name" . }}-reminder-service
+  template:
+    metadata:
+      labels:
+        {{- include "todo-app.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/name: {{ include "todo-app.name" . }}-reminder-service
+        app.kubernetes.io/component: reminder-service
+      annotations:
+        {{- if .Values.dapr.enabled }}
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "reminder-service"
+        dapr.io/app-port: "8003"
+        dapr.io/config: {{ .Values.dapr.config.name | quote }}
+        {{- end }}
+    spec:
+      containers:
+      - name: reminder-service
+        image: "{{ .Values.reminderService.image.repository }}:{{ .Values.reminderService.image.tag }}"
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        ports:
+        - containerPort: 8003
+          name: http
+        env:
+        - name: HOST
+          value: {{ .Values.reminderService.config.host | quote }}
+        - name: PORT
+          value: {{ .Values.reminderService.config.port | quote }}
+        resources:
+          {{- toYaml .Values.reminderService.resources | nindent 10 }}
+{{- end }}

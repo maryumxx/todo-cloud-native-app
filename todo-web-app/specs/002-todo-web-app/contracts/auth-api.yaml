@@ -1,0 +1,199 @@
+openapi: 3.0.0
+info:
+  title: Todo App Authentication API - Phase 2
+  version: 2.0.0
+  description: |
+    Phase 2 Authentication API - Complete rebuild using FastAPI, SQLAlchemy, Passlib/bcrypt, and JWT.
+    All endpoints under /api/auth.
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+
+paths:
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      description: |
+        Creates a new user account with email and password.
+        - Email is normalized to lowercase
+        - Password must be at least 8 characters
+        - Password is hashed using bcrypt
+        - Returns JWT access token on success
+      operationId: register
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+            example:
+              email: "user@example.com"
+              password: "securepassword123"
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+              example:
+                access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                token_type: "bearer"
+        '400':
+          description: Validation error (password too short, invalid email format)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: "Password must be at least 8 characters"
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: "Email already registered"
+
+  /api/auth/login:
+    post:
+      summary: Login user
+      description: |
+        Authenticates user with email and password.
+        - Email is normalized to lowercase
+        - Password is verified using bcrypt
+        - Returns JWT access token (60 min expiry)
+      operationId: login
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+            example:
+              email: "user@example.com"
+              password: "securepassword123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+              example:
+                access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                token_type: "bearer"
+        '401':
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: "Invalid email or password"
+
+  /api/auth/me:
+    get:
+      summary: Get current user
+      description: |
+        Returns the currently authenticated user's information.
+        Requires valid JWT in Authorization header.
+      operationId: getCurrentUser
+      tags:
+        - Authentication
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              example:
+                id: 1
+                email: "user@example.com"
+        '401':
+          description: Not authenticated or token expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                detail: "Could not validate credentials"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token (60 min expiry)
+
+  schemas:
+    UserCreate:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address (normalized to lowercase)
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: User's password (minimum 8 characters)
+
+    UserLogin:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+        password:
+          type: string
+          format: password
+          description: User's password
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User's unique identifier
+        email:
+          type: string
+          format: email
+          description: User's email address
+
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: JWT access token
+        token_type:
+          type: string
+          enum: [bearer]
+          default: bearer
+          description: Token type (always "bearer")
+
+    ErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Error message

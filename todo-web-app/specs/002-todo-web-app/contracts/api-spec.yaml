@@ -1,0 +1,726 @@
+openapi: 3.1.0
+info:
+  title: Todo Web Application API
+  description: RESTful API for the Todo Web Application with JWT authentication
+  version: 1.0.0
+  contact:
+    name: Todo App Team
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.todoapp.com
+    description: Production server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from Better Auth
+
+  schemas:
+    # Error Response
+    ErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          description: Error message
+
+    # User Schemas
+    UserCreate:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+        password:
+          type: string
+          minLength: 8
+          description: Password (minimum 8 characters)
+
+    UserLogin:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        display_name:
+          type: string
+          nullable: true
+        avatar_url:
+          type: string
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        theme_preference:
+          type: string
+          enum: [light, dark, system]
+        notification_preferences:
+          type: object
+        onboarding_completed:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    UserProfileUpdate:
+      type: object
+      properties:
+        display_name:
+          type: string
+          maxLength: 100
+          nullable: true
+        avatar_url:
+          type: string
+          maxLength: 500
+          nullable: true
+        bio:
+          type: string
+          maxLength: 500
+          nullable: true
+        theme_preference:
+          type: string
+          enum: [light, dark, system]
+        notification_preferences:
+          type: object
+
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          default: bearer
+        user:
+          $ref: '#/components/schemas/UserResponse'
+
+    # Task Schemas
+    TaskCreate:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 5000
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 5000
+          nullable: true
+        is_completed:
+          type: boolean
+        due_date:
+          type: string
+          format: date
+          nullable: true
+
+    TaskResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        is_completed:
+          type: boolean
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        position:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    TaskListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskResponse'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        has_more:
+          type: boolean
+
+    TaskReorderRequest:
+      type: object
+      required:
+        - task_ids
+      properties:
+        task_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Ordered list of task IDs
+
+    # Event Schemas
+    EventCreate:
+      type: object
+      required:
+        - title
+        - start_time
+        - end_time
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 5000
+          nullable: true
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+
+    EventUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 5000
+          nullable: true
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+
+    EventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    EventListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventResponse'
+        total:
+          type: integer
+
+paths:
+  # Authentication Endpoints
+  /api/auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a new user
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input or email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login user
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout user
+      operationId: logoutUser
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+        '401':
+          description: Unauthorized
+
+  /api/auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user info
+      operationId: getCurrentUser
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Unauthorized
+
+  # Task Endpoints
+  /api/tasks:
+    get:
+      tags: [Tasks]
+      summary: List user's tasks
+      operationId: listTasks
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+        - name: completed
+          in: query
+          schema:
+            type: boolean
+          description: Filter by completion status
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskListResponse'
+        '401':
+          description: Unauthorized
+
+    post:
+      tags: [Tasks]
+      summary: Create a new task
+      operationId: createTask
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+
+  /api/tasks/{task_id}:
+    parameters:
+      - name: task_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      tags: [Tasks]
+      summary: Get a single task
+      operationId: getTask
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+
+    put:
+      tags: [Tasks]
+      summary: Update a task
+      operationId: updateTask
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+      responses:
+        '200':
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+
+    delete:
+      tags: [Tasks]
+      summary: Delete a task
+      operationId: deleteTask
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Task deleted
+        '401':
+          description: Unauthorized
+        '404':
+          description: Task not found
+
+  /api/tasks/reorder:
+    post:
+      tags: [Tasks]
+      summary: Reorder tasks (drag-and-drop)
+      operationId: reorderTasks
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskReorderRequest'
+      responses:
+        '200':
+          description: Tasks reordered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '400':
+          description: Invalid task IDs
+        '401':
+          description: Unauthorized
+
+  # Event Endpoints
+  /api/events:
+    get:
+      tags: [Events]
+      summary: List user's events
+      operationId: listEvents
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter events starting from this date
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter events until this date
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventListResponse'
+        '401':
+          description: Unauthorized
+
+    post:
+      tags: [Events]
+      summary: Create a new event
+      operationId: createEvent
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCreate'
+      responses:
+        '201':
+          description: Event created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '400':
+          description: Invalid input (e.g., end_time before start_time)
+        '401':
+          description: Unauthorized
+
+  /api/events/{event_id}:
+    parameters:
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      tags: [Events]
+      summary: Get a single event
+      operationId: getEvent
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Event details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Event not found
+
+    put:
+      tags: [Events]
+      summary: Update an event
+      operationId: updateEvent
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventUpdate'
+      responses:
+        '200':
+          description: Event updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '404':
+          description: Event not found
+
+    delete:
+      tags: [Events]
+      summary: Delete an event
+      operationId: deleteEvent
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Event deleted
+        '401':
+          description: Unauthorized
+        '404':
+          description: Event not found
+
+  # User Profile Endpoints
+  /api/users/profile:
+    get:
+      tags: [Users]
+      summary: Get user profile
+      operationId: getUserProfile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Unauthorized
+
+    put:
+      tags: [Users]
+      summary: Update user profile
+      operationId: updateUserProfile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdate'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+
+  /api/users/onboarding:
+    post:
+      tags: [Users]
+      summary: Mark onboarding as complete
+      operationId: completeOnboarding
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Onboarding marked complete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  onboarding_completed:
+                    type: boolean
+        '401':
+          description: Unauthorized
+
+  # Health Check
+  /health:
+    get:
+      tags: [System]
+      summary: Health check endpoint
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time

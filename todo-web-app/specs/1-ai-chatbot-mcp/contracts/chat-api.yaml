@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: AI Chatbot API
+  description: API for the AI Chatbot with MCP Tools
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Development server
+paths:
+  /api/{user_id}/chat:
+    post:
+      summary: Process a chat message from a user
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                conversation_id:
+                  type: integer
+                  description: Optional ID of the conversation to continue
+                message:
+                  type: string
+                  description: The user's message
+              required:
+                - message
+      responses:
+        '200':
+          description: Successful response from the AI agent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversation_id:
+                    type: integer
+                    description: The ID of the conversation
+                  response:
+                    type: string
+                    description: The AI agent's response
+                  tool_calls:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: The name of the MCP tool called
+                        arguments:
+                          type: object
+                          description: Arguments passed to the tool
+                required:
+                  - conversation_id
+                  - response
+                  - tool_calls
+        '400':
+          description: Bad request - invalid input
+        '401':
+          description: Unauthorized - invalid JWT token
+        '500':
+          description: Internal server error
+      security:
+        - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

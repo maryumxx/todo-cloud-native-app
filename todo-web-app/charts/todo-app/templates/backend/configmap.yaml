@@ -1,0 +1,15 @@
+{{- if .Values.backend.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "todo-app.fullname" . }}-backend-config
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ include "todo-app.name" . }}-backend
+    app.kubernetes.io/component: config
+data:
+  HOST: {{ .Values.backend.config.host | quote }}
+  PORT: {{ .Values.backend.config.port | quote }}
+  DEBUG: {{ .Values.backend.config.debug | quote }}
+{{- end }}

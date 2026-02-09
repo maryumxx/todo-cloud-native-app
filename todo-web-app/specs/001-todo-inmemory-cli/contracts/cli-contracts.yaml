@@ -1,0 +1,135 @@
+# API Contracts: Todo In-Memory CLI Application
+
+## Overview
+This document defines the interface contracts for the Todo CLI application. Since this is a CLI application, the contracts represent the command-line interface specifications.
+
+## Command Interface Contracts
+
+### Add Task Command
+```
+Command: add
+Arguments:
+  --title TEXT (required): Task title (1-200 characters)
+  --description TEXT (optional): Task description (up to 1000 characters)
+
+Expected Output:
+  Success: "Task added successfully with ID: {id}"
+  Error: "Error: {error_message}"
+
+Exit Codes:
+  0: Success
+  1: Validation error
+  2: General error
+```
+
+### List Tasks Command
+```
+Command: list
+Arguments: None
+
+Expected Output:
+  Success: Formatted table/list of all tasks with ID, title, description, and status
+  Error: "Error: {error_message}"
+
+Exit Codes:
+  0: Success
+  1: General error
+```
+
+### Update Task Command
+```
+Command: update
+Arguments:
+  --id INTEGER (required): Task ID
+  --title TEXT (optional): New task title (1-200 characters)
+  --description TEXT (optional): New task description (up to 1000 characters)
+
+Expected Output:
+  Success: "Task {id} updated successfully"
+  Error: "Error: {error_message}"
+
+Exit Codes:
+  0: Success
+  1: Validation error
+  2: Task not found
+  3: General error
+```
+
+### Complete Task Command
+```
+Command: complete
+Arguments:
+  --id INTEGER (required): Task ID
+
+Expected Output:
+  Success: "Task {id} marked as complete"
+  Error: "Error: {error_message}"
+
+Exit Codes:
+  0: Success
+  1: Validation error
+  2: Task not found
+  3: General error
+```
+
+### Incomplete Task Command
+```
+Command: incomplete
+Arguments:
+  --id INTEGER (required): Task ID
+
+Expected Output:
+  Success: "Task {id} marked as incomplete"
+  Error: "Error: {error_message}"
+
+Exit Codes:
+  0: Success
+  1: Validation error
+  2: Task not found
+  3: General error
+```
+
+### Delete Task Command
+```
+Command: delete
+Arguments:
+  --id INTEGER (required): Task ID
+
+Expected Output:
+  Success: "Task {id} deleted successfully"
+  Error: "Error: {error_message}"
+
+Exit Codes:
+  0: Success
+  1: Validation error
+  2: Task not found
+  3: General error
+```
+
+## Data Contracts
+
+### Task Object
+```
+{
+  "id": INTEGER (positive integer, unique),
+  "title": STRING (1-200 characters, required),
+  "description": STRING (optional, up to 1000 characters),
+  "completed": BOOLEAN (true/false)
+}
+```
+
+### Error Response Format
+```
+{
+  "error": STRING (descriptive error message),
+  "code": INTEGER (error code)
+}
+```
+
+## Validation Rules
+
+1. All string inputs are trimmed of leading/trailing whitespace
+2. Task titles must be 1-200 characters (after trimming)
+3. Task descriptions must be 0-1000 characters (after trimming)
+4. Task IDs must be positive integers
+5. Operations on non-existent task IDs result in "Task not found" errors

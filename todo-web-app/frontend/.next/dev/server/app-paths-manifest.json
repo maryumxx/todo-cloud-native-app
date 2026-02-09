@@ -1,0 +1,9 @@
+{
+  "/(auth)/register/page": "app/(auth)/register/page.js",
+  "/dashboard/calendar/page": "app/dashboard/calendar/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/profile/page": "app/dashboard/profile/page.js",
+  "/dashboard/tasks/page": "app/dashboard/tasks/page.js",
+  "/onboarding/page": "app/onboarding/page.js",
+  "/page": "app/page.js"
+}

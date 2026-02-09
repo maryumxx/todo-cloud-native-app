@@ -1,0 +1,13 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: todo-backend-pdb
+  namespace: todo-app
+  labels:
+    app.kubernetes.io/name: todo-backend
+    app.kubernetes.io/component: pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: todo-backend

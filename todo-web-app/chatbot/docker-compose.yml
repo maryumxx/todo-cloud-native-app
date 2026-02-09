@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  chatbot-db:
+    image: postgres:15
+    container_name: chatbot-db
+    environment:
+      POSTGRES_DB: chatbot_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - chatbot_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  chatbot-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chatbot-backend
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@chatbot-db:5432/chatbot_db
+      JWT_SECRET_KEY: your-super-secret-jwt-key-change-it-for-production
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    depends_on:
+      chatbot-db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+
+  chatbot-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: chatbot-frontend
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8001
+    depends_on:
+      - chatbot-backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  chatbot_postgres_data:

@@ -1,0 +1,34 @@
+{{- if .Values.dapr.enabled }}
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: {{ .Values.dapr.config.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  tracing:
+    samplingRate: "1"
+    zipkin:
+      endpointAddress: "http://jaeger-query:16686/api/traces"
+  metric:
+    enabled: true
+  httpPipeline:
+    handlers: []
+  grpcPipeline:
+    handlers: []
+  accessControl:
+    defaultAction: allow
+    trustDomain: "todo-app"
+    policies:
+    - appId: "task-api"
+      defaultAction: allow
+      trustDomain: "todo-app"
+      namespace: {{ .Values.global.namespace }}
+    - appId: "recurring-task-service"
+      defaultAction: allow
+      trustDomain: "todo-app"
+      namespace: {{ .Values.global.namespace }}
+    - appId: "reminder-service"
+      defaultAction: allow
+      trustDomain: "todo-app"
+      namespace: {{ .Values.global.namespace }}
+{{- end }}

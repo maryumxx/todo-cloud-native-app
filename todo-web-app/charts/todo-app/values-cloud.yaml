@@ -1,0 +1,152 @@
+# Cloud-specific values for production deployment
+
+global:
+  namespace: todo-app
+  imagePullPolicy: Always  # Changed from IfNotPresent for cloud deployment
+
+# Frontend configuration for cloud
+frontend:
+  enabled: true
+  replicaCount: 3  # Increased for production
+  image:
+    repository: todo-frontend  # This will need to be updated to your cloud registry
+    tag: "2.0.0-cloud"  # Cloud-specific tag
+  service:
+    type: LoadBalancer  # Changed from NodePort for cloud
+    port: 80
+    targetPort: 3000
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  config:
+    apiUrl: "http://todo-backend-svc:8000"
+
+# Backend configuration for cloud
+backend:
+  enabled: true
+  replicaCount: 3  # Increased for production
+  image:
+    repository: todo-backend  # This will need to be updated to your cloud registry
+    tag: "2.0.0-cloud"  # Cloud-specific tag
+  service:
+    type: ClusterIP
+    port: 8000
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 60
+  config:
+    host: "0.0.0.0"
+    port: "8000"
+    debug: "false"
+  secrets:
+    databaseUrl: ""  # This will be provided via cloud secrets
+    secretKey: ""    # This will be provided via cloud secrets
+    openaiApiKey: "" # Optional
+
+# Recurring Task Service configuration for cloud
+recurringTask:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: todo-recurring-task  # This will need to be updated to your cloud registry
+    tag: "2.0.0-cloud"
+  service:
+    type: ClusterIP
+    port: 8002
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  config:
+    host: "0.0.0.0"
+    port: "8002"
+
+# Reminder Service configuration for cloud
+reminderService:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: todo-reminder-service  # This will need to be updated to your cloud registry
+    tag: "2.0.0-cloud"
+  service:
+    type: ClusterIP
+    port: 8003
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  config:
+    host: "0.0.0.0"
+    port: "8003"
+
+# Redis configuration for cloud
+redis:
+  enabled: true
+  architecture: replication  # Changed from standalone for production
+  auth:
+    enabled: true
+    existingSecret: redis-secret
+    existingSecretPasswordKey: redis-password
+  master:
+    persistence:
+      enabled: true  # Enable persistence for production
+      size: 10Gi
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+  replica:
+    replicaCount: 2
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+# Dapr configuration for cloud
+dapr:
+  enabled: true
+  config:
+    name: todo-app-config
+
+# Kafka configuration for cloud
+kafka:
+  enabled: true
+  bootstrapServers: "todo-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092"
+
+# Network policies for cloud security
+networkPolicy:
+  enabled: true
+
+# Resource quotas for cloud
+resourceQuota:
+  enabled: true

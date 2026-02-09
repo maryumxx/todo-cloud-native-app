@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: chatbot-backend
+    env: python
+    region: frankfurt
+    plan: free
+    rootDir: backend
+    buildCommand: |
+      export CRYPTOGRAPHY_DONT_BUILD_RUST=1
+      pip install --upgrade pip
+      pip install psycopg2-binary==2.9.9
+      pip install -r requirements.txt
+    startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: CRYPTOGRAPHY_DONT_BUILD_RUST
+        value: 1
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+    autoDeploy: true
+
+  - type: web
+    name: chatbot-frontend
+    env: node
+    region: frankfurt
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: NEXT_PUBLIC_API_BASE_URL
+        sync: false
+    autoDeploy: true

@@ -1,0 +1,766 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================
+   Modern SaaS Design System
+   Inspired by Linear, Notion, Todoist
+======================================== */
+
+@layer base {
+  :root {
+    /* Core Background - Soft gradient base */
+    --background: 240 20% 98%;
+    --foreground: 222 47% 11%;
+
+    /* Card - Glass white */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Primary - Vibrant Blue */
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Cool Gray */
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 9% 46%;
+
+    /* Muted */
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+
+    /* Accent - Vibrant Purple */
+    --accent: 262 83% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive - Soft Red */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Success - Emerald */
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning - Amber */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Info - Sky Blue */
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+
+    /* Borders & Inputs */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 221 83% 53%;
+
+    /* Sidebar */
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
+
+    /* Radius */
+    --radius: 0.75rem;
+
+    /* Glass Effect Variables */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
+
+    /* Gradient Variables for ProgressRing */
+    --gradient-start: 221 83% 53%;
+    --gradient-end: 262 83% 58%;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 6%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 263 70% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 160 60% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 75% 55%;
+    --warning-foreground: 0 0% 100%;
+
+    --info: 199 80% 55%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 217 91% 60%;
+
+    --sidebar: 222 47% 8%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-accent: 217 33% 14%;
+    --sidebar-accent-foreground: 210 40% 98%;
+
+    --glass-bg: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+
+    /* Gradient Variables for ProgressRing */
+    --gradient-start: 217 91% 60%;
+    --gradient-end: 263 70% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* Remove tap highlight on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ========================================
+   Custom Scrollbar
+======================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.35);
+}
+
+/* ========================================
+   Glassmorphism Components
+======================================== */
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    isolation: isolate;
+  }
+
+  .glass-card {
+    @apply rounded-2xl;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    isolation: isolate;
+  }
+
+  .glass-subtle {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .dark .glass-subtle {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* ========================================
+   Gradient Backgrounds
+======================================== */
+@layer components {
+  .gradient-bg {
+    @apply bg-gradient-mesh;
+    background-color: hsl(var(--background));
+  }
+
+  .dark .gradient-bg {
+    @apply bg-gradient-mesh-dark;
+    background-color: hsl(var(--background));
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+  }
+
+  .gradient-accent {
+    background: linear-gradient(135deg, #a855f7 0%, #3b82f6 50%, #06b6d4 100%);
+  }
+
+  .gradient-warm {
+    background: linear-gradient(135deg, #f97316 0%, #ec4899 50%, #a855f7 100%);
+  }
+
+  .gradient-cool {
+    background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #a855f7 100%);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* ========================================
+   Animated Background Blobs
+======================================== */
+@layer components {
+  .blob {
+    @apply absolute rounded-full blur-3xl opacity-30;
+    animation: blob 7s infinite;
+  }
+
+  .blob-1 {
+    @apply bg-neon-purple w-72 h-72;
+    animation-delay: 0s;
+  }
+
+  .blob-2 {
+    @apply bg-neon-cyan w-72 h-72;
+    animation-delay: 2s;
+  }
+
+  .blob-3 {
+    @apply bg-neon-pink w-72 h-72;
+    animation-delay: 4s;
+  }
+}
+
+/* ========================================
+   Card Variants
+======================================== */
+@layer components {
+  .card-elevated {
+    @apply bg-card rounded-2xl shadow-soft;
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .card-elevated:hover {
+    @apply shadow-soft-lg;
+    transform: translateY(-2px);
+    transition: all 0.2s ease-out;
+  }
+
+  .card-interactive {
+    @apply bg-card rounded-2xl shadow-soft transition-all duration-200;
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .card-interactive:hover {
+    @apply shadow-soft-lg border-primary/20;
+    transform: translateY(-2px);
+  }
+
+  .card-gradient {
+    @apply rounded-2xl p-[1px];
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.5) 0%, hsl(var(--accent) / 0.5) 100%);
+  }
+
+  .card-gradient-inner {
+    @apply bg-card rounded-2xl h-full w-full;
+  }
+}
+
+/* ========================================
+   Button Styles
+======================================== */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    @apply disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-primary-foreground px-6 py-2.5;
+    @apply hover:opacity-90 active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply btn bg-secondary text-secondary-foreground px-6 py-2.5;
+    @apply hover:bg-secondary/80 active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply btn text-foreground px-4 py-2;
+    @apply hover:bg-secondary active:scale-[0.98];
+  }
+
+  .btn-gradient {
+    @apply btn px-6 py-2.5 text-white;
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    @apply hover:opacity-90 active:scale-[0.98];
+  }
+
+  .btn-outline {
+    @apply btn px-6 py-2.5 border-2 border-border bg-transparent;
+    @apply hover:bg-secondary active:scale-[0.98];
+  }
+
+  .btn-glow {
+    @apply btn-primary;
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
+  }
+
+  .btn-icon {
+    @apply btn w-10 h-10 p-0 rounded-xl;
+    @apply hover:bg-secondary active:scale-[0.95];
+  }
+}
+
+/* ========================================
+   Input Styles
+======================================== */
+@layer components {
+  .input-modern {
+    @apply w-full px-4 py-3 bg-secondary/50 border border-border rounded-xl;
+    @apply text-foreground placeholder:text-muted-foreground;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20;
+  }
+
+  .input-glass {
+    @apply w-full px-4 py-3 rounded-xl;
+    @apply text-foreground placeholder:text-muted-foreground;
+    @apply transition-all duration-200;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    @apply focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20;
+  }
+
+  .input-minimal {
+    @apply w-full px-4 py-3 bg-transparent border-b-2 border-border rounded-none;
+    @apply text-foreground placeholder:text-muted-foreground;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:border-primary;
+  }
+}
+
+/* ========================================
+   Badge / Status Styles
+======================================== */
+@layer components {
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply badge bg-primary/10 text-primary;
+  }
+
+  .badge-success {
+    @apply badge bg-success/10 text-success;
+  }
+
+  .badge-warning {
+    @apply badge bg-warning/10 text-warning;
+  }
+
+  .badge-destructive {
+    @apply badge bg-destructive/10 text-destructive;
+  }
+
+  .badge-purple {
+    @apply badge bg-neon-purple/10 text-neon-purple;
+  }
+
+  .badge-cyan {
+    @apply badge bg-neon-cyan/10 text-neon-cyan;
+  }
+
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+
+  .status-dot-success {
+    @apply status-dot bg-success;
+  }
+
+  .status-dot-warning {
+    @apply status-dot bg-warning;
+  }
+
+  .status-dot-destructive {
+    @apply status-dot bg-destructive;
+  }
+
+  .status-dot-primary {
+    @apply status-dot bg-primary;
+  }
+}
+
+/* ========================================
+   Sidebar Styles
+======================================== */
+@layer components {
+  .sidebar {
+    @apply h-full bg-sidebar border-r border-sidebar-border;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium;
+    @apply text-sidebar-foreground/70 transition-all duration-200;
+  }
+
+  .sidebar-item:hover {
+    @apply bg-sidebar-accent text-sidebar-foreground;
+  }
+
+  .sidebar-item.active {
+    @apply bg-primary/10 text-primary font-semibold;
+  }
+
+  .sidebar-section {
+    @apply text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2 mt-6;
+  }
+}
+
+/* ========================================
+   Navigation Components
+======================================== */
+@layer components {
+  .nav-item {
+    @apply flex flex-col items-center gap-1 py-2 px-4 text-muted-foreground;
+    @apply transition-all duration-200;
+  }
+
+  .nav-item:hover {
+    @apply text-foreground;
+  }
+
+  .nav-item.active {
+    @apply text-primary;
+  }
+
+  .nav-item-icon {
+    @apply w-6 h-6;
+  }
+
+  .nav-item-label {
+    @apply text-xs font-medium;
+  }
+}
+
+/* ========================================
+   Task Item Styles
+======================================== */
+@layer components {
+  .task-item {
+    @apply flex items-start gap-4 p-4 rounded-xl transition-all duration-200;
+    @apply bg-card border border-border/50;
+  }
+
+  .task-item:hover {
+    @apply border-border shadow-soft;
+  }
+
+  .task-checkbox {
+    @apply w-5 h-5 rounded-full border-2 border-muted-foreground/30;
+    @apply flex items-center justify-center cursor-pointer;
+    @apply transition-all duration-200;
+  }
+
+  .task-checkbox:hover {
+    @apply border-primary;
+  }
+
+  .task-checkbox.checked {
+    @apply bg-primary border-primary;
+  }
+
+  .task-priority-high {
+    @apply border-l-4 border-l-destructive;
+  }
+
+  .task-priority-medium {
+    @apply border-l-4 border-l-warning;
+  }
+
+  .task-priority-low {
+    @apply border-l-4 border-l-success;
+  }
+}
+
+/* ========================================
+   Floating Action Button
+======================================== */
+@layer components {
+  .fab {
+    @apply fixed z-50 w-14 h-14 rounded-full shadow-float;
+    @apply flex items-center justify-center;
+    @apply transition-all duration-300 ease-bounce-in;
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+  }
+
+  .fab:hover {
+    @apply scale-110;
+    box-shadow: 0 10px 40px -10px hsl(var(--primary) / 0.5);
+  }
+
+  .fab:active {
+    @apply scale-95;
+  }
+
+  .fab-icon {
+    @apply w-6 h-6 text-white;
+  }
+}
+
+/* ========================================
+   Progress Ring
+======================================== */
+@layer components {
+  .progress-ring {
+    @apply relative inline-flex items-center justify-center;
+  }
+
+  .progress-ring-circle {
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+  }
+
+  .progress-ring-bg {
+    @apply stroke-muted;
+  }
+
+  .progress-ring-fill {
+    @apply stroke-primary;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease-out;
+  }
+}
+
+/* ========================================
+   Avatar Styles
+======================================== */
+@layer components {
+  .avatar {
+    @apply relative inline-flex items-center justify-center overflow-hidden rounded-full;
+    @apply bg-gradient-to-br from-primary to-accent;
+  }
+
+  .avatar-sm {
+    @apply w-8 h-8 text-xs;
+  }
+
+  .avatar-md {
+    @apply w-10 h-10 text-sm;
+  }
+
+  .avatar-lg {
+    @apply w-12 h-12 text-base;
+  }
+
+  .avatar-xl {
+    @apply w-16 h-16 text-lg;
+  }
+
+  .avatar-image {
+    @apply w-full h-full object-cover;
+  }
+
+  .avatar-fallback {
+    @apply text-white font-medium;
+  }
+
+  .avatar-ring {
+    @apply ring-2 ring-background ring-offset-2 ring-offset-primary;
+  }
+
+  .avatar-status {
+    @apply absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background;
+  }
+
+  .avatar-status-online {
+    @apply avatar-status bg-success;
+  }
+
+  .avatar-status-offline {
+    @apply avatar-status bg-muted-foreground;
+  }
+}
+
+/* ========================================
+   Loading States
+======================================== */
+@layer components {
+  .skeleton {
+    @apply animate-pulse bg-muted rounded-lg;
+  }
+
+  .shimmer {
+    @apply relative overflow-hidden;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--muted-foreground) / 0.1) 50%,
+      hsl(var(--muted)) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .spinner {
+    @apply w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin;
+  }
+}
+
+/* ========================================
+   Focus States
+======================================== */
+@layer utilities {
+  .focus-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50;
+    @apply focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  .focus-within-ring {
+    @apply focus-within:ring-2 focus-within:ring-primary/50;
+    @apply focus-within:ring-offset-2 focus-within:ring-offset-background;
+  }
+}
+
+/* ========================================
+   Utility Classes
+======================================== */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .mask-gradient-b {
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  }
+
+  .no-tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ========================================
+   Page Transitions
+======================================== */
+@layer utilities {
+  .page-enter {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  }
+
+  .page-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .page-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+  }
+}
+
+/* ========================================
+   Reduced Motion
+======================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .blob {
+    animation: none !important;
+  }
+}
+
+/* ========================================
+   Mobile-specific styles
+======================================== */
+@media (max-width: 768px) {
+  .glass-card {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}

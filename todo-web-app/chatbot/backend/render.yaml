@@ -1,0 +1,20 @@
+# Render deployment configuration
+services:
+  - type: web
+    name: task-chatbot-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.main_simple:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      - key: MAIN_BACKEND_URL
+        sync: false  # Set to your main backend URL (e.g., https://your-backend.onrender.com)
+      - key: FRONTEND_URL
+        sync: false  # Set to your Vercel URL (e.g., https://taskflowtodo.vercel.app)
+    disk:
+      name: chatbot-data
+      mountPath: /opt/render/project/data
+      sizeGB: 1

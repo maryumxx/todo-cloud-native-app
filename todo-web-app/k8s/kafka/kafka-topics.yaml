@@ -1,0 +1,77 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: task-events
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: todo-kafka
+spec:
+  partitions: 6
+  replicas: 1
+  config:
+    retention.ms: 604800000  # 7 days
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: reminder-events
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: todo-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 86400000  # 1 day
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: notification-events
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: todo-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 86400000  # 1 day
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: audit-events
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: todo-kafka
+spec:
+  partitions: 6
+  replicas: 1
+  config:
+    retention.ms: 2592000000  # 30 days
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: chat-events
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: todo-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 604800000  # 7 days
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: dlq-events
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: todo-kafka
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 1209600000  # 14 days

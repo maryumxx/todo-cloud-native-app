@@ -1,0 +1,11 @@
+(globalThis.TURBOPACK_CHUNK_LISTS || (globalThis.TURBOPACK_CHUNK_LISTS = [])).push({
+    script: typeof document === "object" ? document.currentScript : undefined,
+    chunks: [
+  "static/chunks/e7467_framer-motion_dist_es_e794c8c4._.js",
+  "static/chunks/e7467_react-icons_hi2_index_mjs_40015832._.js",
+  "static/chunks/e7467_react-icons_lib_80057368._.js",
+  "static/chunks/e7467_1c9bf91b._.js",
+  "static/chunks/OneDrive_Desktop_todoapp_todo-web-app_frontend_a033e574._.js"
+],
+    source: "dynamic"
+});

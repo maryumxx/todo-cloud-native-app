@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-ingress
+  namespace: todo-app
+  labels:
+    app.kubernetes.io/name: todo-app
+    app.kubernetes.io/component: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: todo-frontend
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []  # Allow from all sources (external access)
+    ports:
+    - protocol: TCP
+      port: 3000

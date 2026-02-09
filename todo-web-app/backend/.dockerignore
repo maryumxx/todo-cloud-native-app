@@ -1,0 +1,16 @@
+__pycache__
+*.pyc
+.git
+*.md
+.env*
+Dockerfile*
+docker-compose*
+*.db
+venv
+.venv
+tests
+__init__.py
+.gitignore
+README.md
+requirements-dev.txt
+alembic.ini

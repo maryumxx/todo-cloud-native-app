@@ -1,0 +1,46 @@
+{{- if .Values.recurringTask.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "todo-app.fullname" . }}-recurring-task
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ include "todo-app.name" . }}-recurring-task
+    app.kubernetes.io/component: recurring-task
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+spec:
+  replicas: {{ .Values.recurringTask.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "todo-app.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: {{ include "todo-app.name" . }}-recurring-task
+  template:
+    metadata:
+      labels:
+        {{- include "todo-app.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/name: {{ include "todo-app.name" . }}-recurring-task
+        app.kubernetes.io/component: recurring-task
+      annotations:
+        {{- if .Values.dapr.enabled }}
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "recurring-task-service"
+        dapr.io/app-port: "8002"
+        dapr.io/config: {{ .Values.dapr.config.name | quote }}
+        {{- end }}
+    spec:
+      containers:
+      - name: recurring-task
+        image: "{{ .Values.recurringTask.image.repository }}:{{ .Values.recurringTask.image.tag }}"
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        ports:
+        - containerPort: 8002
+          name: http
+        env:
+        - name: HOST
+          value: {{ .Values.recurringTask.config.host | quote }}
+        - name: PORT
+          value: {{ .Values.recurringTask.config.port | quote }}
+        resources:
+          {{- toYaml .Values.recurringTask.resources | nindent 10 }}
+{{- end }}

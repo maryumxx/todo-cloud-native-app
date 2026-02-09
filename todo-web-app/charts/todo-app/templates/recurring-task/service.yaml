@@ -1,0 +1,20 @@
+{{- if .Values.recurringTask.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "todo-app.fullname" . }}-recurring-task-svc
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ include "todo-app.name" . }}-recurring-task
+    app.kubernetes.io/component: recurring-task
+spec:
+  type: {{ .Values.recurringTask.service.type }}
+  selector:
+    {{- include "todo-app.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ include "todo-app.name" . }}-recurring-task
+  ports:
+  - name: http
+    port: {{ .Values.recurringTask.service.port }}
+    targetPort: 8002
+{{- end }}

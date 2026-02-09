@@ -1,0 +1,148 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+
+    - name: Lint with flake8
+      run: |
+        # Stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Test with pytest
+      run: |
+        pytest
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push frontend
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend
+        file: ./frontend/Dockerfile
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/todo-frontend:latest,${{ secrets.DOCKER_USERNAME }}/todo-frontend:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push backend
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        file: ./backend/Dockerfile
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/todo-backend:latest,${{ secrets.DOCKER_USERNAME }}/todo-backend:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push recurring-task service
+      uses: docker/build-push-action@v5
+      with:
+        context: ./services/recurring-task
+        file: ./services/recurring-task/Dockerfile
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/todo-recurring-task:latest,${{ secrets.DOCKER_USERNAME }}/todo-recurring-task:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push reminder service
+      uses: docker/build-push-action@v5
+      with:
+        context: ./services/reminder-service
+        file: ./services/reminder-service/Dockerfile
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/todo-reminder-service:latest,${{ secrets.DOCKER_USERNAME }}/todo-reminder-service:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: 'latest'
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Get AKS Credentials
+      run: |
+        az aks get-credentials --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }}
+
+    - name: Deploy to AKS
+      run: |
+        # Update Helm dependencies
+        cd charts/todo-app
+        helm dependency update
+        
+        # Deploy the application
+        helm upgrade --install todo-app . \
+          --namespace todo-app \
+          --create-namespace \
+          --set frontend.image.tag=${{ github.sha }} \
+          --set backend.image.tag=${{ github.sha }} \
+          --set recurringTask.image.tag=${{ github.sha }} \
+          --set reminderService.image.tag=${{ github.sha }} \
+          --wait
+
+    - name: Verify Deployment
+      run: |
+        kubectl get pods -n todo-app
+        kubectl rollout status deployment/todo-frontend -n todo-app
+        kubectl rollout status deployment/todo-backend -n todo-app
